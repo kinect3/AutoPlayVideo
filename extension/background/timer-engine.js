@@ -270,7 +270,7 @@ export class SleepTimerEngine {
       
       await chrome.notifications.create('vibootExpired', {
         type: 'basic',
-        iconUrl: '../assets/icons/icon-128.png',
+        iconUrl: 'assets/icons/android-chrome-192x192.png',
         title: 'Sleep Timer Expired',
         message: 'Your video has been paused. Sweet dreams!',
         priority: 2
