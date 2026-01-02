@@ -123,6 +123,11 @@ body {
   color: var(--success);
 }
 
+.platform-badge.generic {
+  background: rgba(251, 191, 36, 0.15);
+  color: #f59e0b;
+}
+
 .platform-badge.unsupported {
   background: rgba(239, 68, 68, 0.15);
   color: var(--danger);

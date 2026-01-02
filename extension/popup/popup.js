@@ -141,7 +141,9 @@ async function detectPlatform() {
       'primevideo.com': 'Prime Video',
       'hbomax.com': 'HBO Max',
       'max.com': 'Max',
-      'crunchyroll.com': 'Crunchyroll'
+      'crunchyroll.com': 'Crunchyroll',
+      'twitch.tv': 'Twitch',
+      'hulu.com': 'Hulu'
     };
     
     let detected = null;
@@ -155,16 +157,43 @@ async function detectPlatform() {
     if (detected) {
       setPlatformBadge(detected, true);
     } else {
-      setPlatformBadge('Not supported', false);
+      // Extract site name from hostname (e.g., "crave" from "www.crave.ca")
+      const siteName = extractSiteName(hostname);
+      setPlatformBadge(siteName, 'generic');
     }
   } catch (error) {
     setPlatformBadge('Error', false);
   }
 }
 
+function extractSiteName(hostname) {
+  // Remove www. prefix and get the main domain name
+  let name = hostname.replace(/^www\./, '');
+  
+  // Split by dots and get the main part (before TLD)
+  const parts = name.split('.');
+  if (parts.length >= 2) {
+    // Get the second-to-last part (main domain name)
+    name = parts[parts.length - 2];
+  } else {
+    name = parts[0];
+  }
+  
+  // Capitalize first letter
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
 function setPlatformBadge(text, supported) {
   elements.platformBadge.textContent = text;
-  elements.platformBadge.className = 'platform-badge ' + (supported ? 'supported' : 'unsupported');
+  
+  // Handle three states: supported (green), generic (yellow/neutral), unsupported (red)
+  if (supported === true || supported === 'supported') {
+    elements.platformBadge.className = 'platform-badge supported';
+  } else if (supported === 'generic') {
+    elements.platformBadge.className = 'platform-badge generic';
+  } else {
+    elements.platformBadge.className = 'platform-badge unsupported';
+  }
 }
 
 // ============================================
