@@ -14,6 +14,7 @@ export class SleepTimerEngine {
     this.activeTimer = null;
     this.intervalId = null;
     this.lastBroadcast = 0;
+    this.isExpiring = false; // Prevent multiple expiration calls
     
     // Set up tab close listener
     this.setupTabListener();
@@ -115,15 +116,23 @@ export class SleepTimerEngine {
   
   async handleAlarm(alarmName) {
     if (alarmName === 'vibootTimerTick') {
-      await this.syncTimerState();
+      // Don't sync if we're in the middle of expiring
+      if (!this.isExpiring) {
+        await this.syncTimerState();
+      }
     } else if (alarmName === 'vibootTimerExpiry') {
-      if (this.activeTimer && this.activeTimer.remaining <= 0) {
+      // Direct expiration alarm - always try to expire
+      if (this.activeTimer && !this.isExpiring) {
+        this.activeTimer.remaining = 0;
         await this.onTimerExpire();
       }
     }
   }
   
   async syncTimerState() {
+    // Don't sync during expiration
+    if (this.isExpiring) return;
+    
     const result = await chrome.storage.local.get('activeTimer');
     
     if (!result.activeTimer || result.activeTimer.status !== 'active') {
@@ -157,9 +166,17 @@ export class SleepTimerEngine {
   }
   
   async onTimerExpire() {
+    // Prevent multiple simultaneous expiration calls
+    if (this.isExpiring) {
+      console.log('[Viboot] Timer expiration already in progress, skipping');
+      return;
+    }
+    this.isExpiring = true;
+    
     console.log('[Viboot] Timer expired! Pausing video...');
     
     if (!this.activeTimer) {
+      this.isExpiring = false;
       await this.finalCleanup();
       return;
     }
@@ -193,17 +210,20 @@ export class SleepTimerEngine {
     }
     
     await this.finalCleanup();
+    this.isExpiring = false;
   }
   
   async stopTimer() {
     console.log('[Viboot] Stopping timer');
+    this.isExpiring = false; // Reset flag in case we're stopping during expiration
     const tabId = this.activeTimer?.tabId;
     this.cleanup();
-    if (tabId) this.notifyContentScript(tabId, { action: 'destroyOverlay' });
+    if (tabId) this.notifyContentScript(tabId, { action: 'destroyOverlay' }).catch(() => {});
     await this.finalCleanup();
   }
   
   cleanup() {
+    this.isExpiring = false;
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
