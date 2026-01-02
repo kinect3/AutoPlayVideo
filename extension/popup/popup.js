@@ -189,19 +189,6 @@ async function startTimer(minutes) {
       return;
     }
     
-    // Check if there's a video on the page first
-    try {
-      const statusResponse = await chrome.tabs.sendMessage(tab.id, { action: 'getPlaybackStatus' });
-      if (!statusResponse?.success || !statusResponse.status?.hasVideo) {
-        const proceed = confirm('⚠️ No video detected on this page.\\n\\nThe timer will still run, but may not be able to pause anything when it expires.\\n\\nStart timer anyway?');
-        if (!proceed) return;
-      }
-    } catch (e) {
-      // Content script might not be loaded - warn user
-      const proceed = confirm('⚠️ Cannot detect video on this page.\\n\\nThis might not be a supported streaming site.\\n\\nStart timer anyway?');
-      if (!proceed) return;
-    }
-    
     const response = await chrome.runtime.sendMessage({
       action: 'startTimer',
       minutes: minutes,
