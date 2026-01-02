@@ -620,26 +620,59 @@ function setupEventListeners() {
 }
 
 function handleCustomInput() {
-  const input = elements.customInput.value;
+  const input = elements.customInput.value.trim();
+  
+  // Clear previous error
+  hideInputError();
+  
+  if (!input) {
+    showInputError('Please enter a duration');
+    return;
+  }
+  
   const seconds = parseTimeInput(input);
   
   if (!seconds || seconds < 1) {
-    elements.customInput.style.borderColor = 'var(--danger)';
-    setTimeout(() => {
-      elements.customInput.style.borderColor = '';
-    }, 1000);
+    showInputError('Invalid format. Use: 30s, 5m, 1h 30m');
     return;
   }
   
   const maxSeconds = 24 * 60 * 60; // 24 hours
   if (seconds > maxSeconds) {
-    alert('Maximum timer is 24 hours');
+    showInputError('Maximum timer is 24 hours');
     return;
   }
   
   // Convert to minutes for timer engine (supports fractional)
   startTimer(seconds / 60);
   elements.customInput.value = '';
+}
+
+function showInputError(message) {
+  const errorEl = document.getElementById('inputError');
+  const errorText = document.getElementById('errorText');
+  const hintEl = document.getElementById('inputHint');
+  
+  if (errorEl && errorText) {
+    errorText.textContent = message;
+    errorEl.classList.remove('hidden');
+    elements.customInput.classList.add('input-error-state');
+    if (hintEl) hintEl.classList.add('hidden');
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => hideInputError(), 3000);
+  }
+}
+
+function hideInputError() {
+  const errorEl = document.getElementById('inputError');
+  const hintEl = document.getElementById('inputHint');
+  
+  if (errorEl) {
+    errorEl.classList.add('hidden');
+    elements.customInput.classList.remove('input-error-state');
+    if (hintEl) hintEl.classList.remove('hidden');
+  }
 }
 
 // ============================================

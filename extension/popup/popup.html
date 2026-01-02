@@ -67,7 +67,11 @@
         >
         <button class="set-btn" id="setBtn">Set</button>
       </div>
-      <p class="input-hint">Format: 30s, 5m, 1h 30m (1 second - 24 hours)</p>
+      <div class="input-error hidden" id="inputError">
+        <span class="error-icon">⚠️</span>
+        <span class="error-text" id="errorText">Error message</span>
+      </div>
+      <p class="input-hint" id="inputHint">Format: 30s, 5m, 1h 30m (1 second - 24 hours)</p>
     </section>
 
     <!-- Divider -->

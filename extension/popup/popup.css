@@ -375,6 +375,43 @@ body {
   text-align: center;
 }
 
+/* Input Error Message */
+.input-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  animation: errorShake 0.4s ease-out;
+}
+
+.input-error .error-icon {
+  font-size: 14px;
+}
+
+.input-error .error-text {
+  font-size: 12px;
+  color: var(--danger);
+  font-weight: 500;
+}
+
+#customInput.input-error-state {
+  border-color: var(--danger) !important;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+
 /* ============================================
    Divider
    ============================================ */
