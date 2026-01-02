@@ -335,15 +335,25 @@ function updateRingProgress() {
 function startLocalUpdates() {
   stopLocalUpdates();
   
-  updateInterval = setInterval(() => {
-    if (currentTimer && currentTimer.remaining > 0) {
-      currentTimer.remaining--;
-      updateTimerDisplay();
+  // Poll the background for timer status every second instead of local countdown
+  // This ensures all popups stay in sync with the authoritative timer state
+  updateInterval = setInterval(async () => {
+    try {
+      const response = await chrome.runtime.sendMessage({ action: 'getTimerStatus' });
       
-      if (currentTimer.remaining <= 0) {
+      if (response?.success && response.status?.active) {
+        currentTimer = response.status;
+        updateTimerDisplay();
+      } else {
+        // Timer ended or was stopped
+        currentTimer = null;
         stopLocalUpdates();
         showInactiveTimer();
       }
+    } catch (error) {
+      // Extension context may have been invalidated
+      console.warn('[Viboot] Failed to get timer status:', error);
+      stopLocalUpdates();
     }
   }, 1000);
 }
