@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "Viboot - Stream Control",
+  "version": "2.0",
+  "description": "Sleep timer for streaming platforms. Don't binge. Sleep better.",
+  "permissions": ["storage", "alarms", "scripting", "notifications", "activeTab"],
+  "host_permissions": [
+    "*://*.netflix.com/*",
+    "*://*.youtube.com/*",
+    "*://*.disneyplus.com/*",
+    "*://*.max.com/*",
+    "*://*.hbomax.com/*",
+    "*://*.primevideo.com/*",
+    "*://*.amazon.com/*",
+    "*://*.crunchyroll.com/*",
+    "*://*.twitch.tv/*",
+    "*://*.hulu.com/*",
+    "https://viboot-api.onrender.com/*"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.netflix.com/*",
+        "*://*.youtube.com/*",
+        "*://*.crunchyroll.com/*",
+        "*://*.disneyplus.com/*",
+        "*://*.max.com/*",
+        "*://*.hbomax.com/*",
+        "*://*.primevideo.com/*",
+        "*://*.amazon.com/gp/video/*",
+        "*://*.twitch.tv/*",
+        "*://*.hulu.com/*"
+      ],
+      "js": ["content/streaming-controller.js"],
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Viboot Sleep Timer"
+  }
+}
