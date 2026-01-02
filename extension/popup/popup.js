@@ -87,8 +87,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Set up event listeners
     setupEventListeners();
     
-    // Listen for timer updates from background
-    chrome.runtime.onMessage.addListener(handleMessage);
+    // Note: We use polling in startLocalUpdates instead of message listeners
+    // This avoids race conditions with multiple popups
   } catch (error) {
     console.error('[Viboot] Popup initialization failed:', error);
   }
@@ -334,6 +334,12 @@ function updateRingProgress() {
 
 function startLocalUpdates() {
   stopLocalUpdates();
+  
+  // Immediately update the display before starting the interval
+  // This ensures the timer shows right away when popup opens
+  if (currentTimer?.active || currentTimer?.remaining > 0) {
+    showActiveTimer();
+  }
   
   // Poll the background for timer status every second instead of local countdown
   // This ensures all popups stay in sync with the authoritative timer state
@@ -733,21 +739,8 @@ function hideInputError() {
   }
 }
 
-// ============================================
-// MESSAGE HANDLING
-// ============================================
-
-function handleMessage(message) {
-  if (message.action === 'timerUpdate' && message.status) {
-    currentTimer = message.status;
-    
-    if (currentTimer.active) {
-      showActiveTimer();
-    } else {
-      showInactiveTimer();
-    }
-  }
-}
+// Note: Message handling removed - popup uses polling via startLocalUpdates
+// This prevents race conditions when multiple popups are open
 
 // ============================================
 // CLEANUP

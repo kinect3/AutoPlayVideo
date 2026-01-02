@@ -15,6 +15,8 @@ export class SleepTimerEngine {
     this.intervalId = null;
     this.lastBroadcast = 0;
     this.isExpiring = false; // Prevent multiple expiration calls
+    this.isTicking = false; // Prevent overlapping ticks
+    this.isRestoring = false; // Prevent concurrent restoration
     
     // Set up tab close listener
     this.setupTabListener();
@@ -95,11 +97,14 @@ export class SleepTimerEngine {
   }
   
   async tick() {
-    if (!this.activeTimer || this.isExpiring) {
+    // Prevent overlapping ticks and check state
+    if (!this.activeTimer || this.isExpiring || this.isTicking) {
       return;
     }
+    this.isTicking = true;
     
-    this.activeTimer.remaining--;
+    try {
+      this.activeTimer.remaining--;
     
     // Check for expiration FIRST, before any other async operations
     if (this.activeTimer.remaining <= 0) {
@@ -123,6 +128,9 @@ export class SleepTimerEngine {
     }
     
     this.broadcastTimerUpdate();
+    } finally {
+      this.isTicking = false;
+    }
   }
   
   async handleAlarm(alarmName) {
@@ -235,6 +243,7 @@ export class SleepTimerEngine {
   
   cleanup() {
     this.isExpiring = false;
+    this.isTicking = false;
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
@@ -272,17 +281,46 @@ export class SleepTimerEngine {
     return this.activeTimer;
   }
   
-  getTimerStatus() {
-    if (!this.activeTimer) return { active: false };
-    
-    return {
-      active: true,
-      remaining: this.activeTimer.remaining,
-      duration: this.activeTimer.duration,
-      platform: this.activeTimer.platform,
-      tabId: this.activeTimer.tabId,
-      minutesRemaining: Math.ceil(this.activeTimer.remaining / 60)
-    };
+  async getTimerStatus() {
+    // Always read from storage for accuracy across multiple popups
+    // This doesn't start the countdown - just returns status
+    try {
+      const result = await chrome.storage.local.get('activeTimer');
+      const saved = result.activeTimer;
+      
+      if (!saved || saved.status !== 'active') {
+        return { active: false };
+      }
+      
+      // Calculate remaining time based on start time
+      const elapsed = Math.floor((Date.now() - saved.startTime) / 1000);
+      const remaining = Math.max(0, saved.duration - elapsed);
+      
+      if (remaining <= 0) {
+        return { active: false };
+      }
+      
+      // Update in-memory state if not already set (lazy restoration)
+      if (!this.activeTimer && !this.isRestoring) {
+        // Trigger restoration in background (don't await to avoid blocking)
+        this.restoreTimer().catch(e => console.warn('[Viboot] Background restore failed:', e));
+      } else if (this.activeTimer) {
+        // Keep in-memory value in sync
+        this.activeTimer.remaining = remaining;
+      }
+      
+      return {
+        active: true,
+        remaining: remaining,
+        duration: saved.duration,
+        platform: saved.platform,
+        tabId: saved.tabId,
+        minutesRemaining: Math.ceil(remaining / 60)
+      };
+    } catch (error) {
+      console.error('[Viboot] Failed to get timer status:', error);
+      return { active: false };
+    }
   }
   
   async pauseVideo(tabId) {
@@ -290,7 +328,8 @@ export class SleepTimerEngine {
       await chrome.tabs.sendMessage(tabId, { action: 'pauseVideo', source: 'sleepTimer' });
       console.log('[Viboot] Video paused successfully');
     } catch (error) {
-      console.error('[Viboot] Failed to pause video:', error);
+      // Content script not available - use fallback silently
+      console.log('[Viboot] Content script unavailable, using fallback');
       await this.pauseVideoFallback(tabId);
     }
   }
@@ -303,7 +342,7 @@ export class SleepTimerEngine {
       });
       console.log('[Viboot] Video paused via fallback');
     } catch (error) {
-      console.error('[Viboot] Fallback pause failed:', error);
+      console.warn('[Viboot] Fallback pause failed:', error.message);
     }
   }
   
@@ -314,7 +353,7 @@ export class SleepTimerEngine {
       
       await chrome.notifications.create('vibootExpired', {
         type: 'basic',
-        iconUrl: 'assets/icons/android-chrome-192x192.png',
+        iconUrl: chrome.runtime.getURL('assets/icons/android-chrome-192x192.png'),
         title: 'Sleep Timer Expired',
         message: 'Your video has been paused. Sweet dreams!',
         priority: 2
@@ -356,7 +395,7 @@ export class SleepTimerEngine {
   }
   
   notifyContentScript(tabId, message) {
-    chrome.tabs.sendMessage(tabId, message).catch(() => {});
+    return chrome.tabs.sendMessage(tabId, message).catch(() => {});
   }
   
   detectPlatform(url) {
@@ -382,10 +421,21 @@ export class SleepTimerEngine {
   }
   
   async restoreTimer() {
+    // Don't restore if timer is already active, currently expiring, or already restoring
+    if (this.activeTimer || this.isExpiring || this.isRestoring) {
+      console.log('[Viboot] Timer already active/restoring, skipping restore');
+      return this.activeTimer;
+    }
+    
+    this.isRestoring = true;
+    
     try {
       const result = await chrome.storage.local.get('activeTimer');
       
-      if (!result.activeTimer || result.activeTimer.status !== 'active') return null;
+      if (!result.activeTimer || result.activeTimer.status !== 'active') {
+        this.isRestoring = false;
+        return null;
+      }
       
       const saved = result.activeTimer;
       
@@ -394,6 +444,7 @@ export class SleepTimerEngine {
       } catch (e) {
         console.log('[Viboot] Timer tab no longer exists');
         await this.finalCleanup();
+        this.isRestoring = false;
         return null;
       }
       
@@ -403,6 +454,7 @@ export class SleepTimerEngine {
       if (remaining <= 0) {
         this.activeTimer = { ...saved, remaining: 0 };
         await this.onTimerExpire();
+        this.isRestoring = false;
         return null;
       }
       
@@ -415,10 +467,12 @@ export class SleepTimerEngine {
       this.updateBadge();
       
       console.log('[Viboot] Timer restored: ' + Math.ceil(remaining / 60) + ' min remaining');
+      this.isRestoring = false;
       return this.activeTimer;
       
     } catch (error) {
       console.error('[Viboot] Failed to restore timer:', error);
+      this.isRestoring = false;
       return null;
     }
   }

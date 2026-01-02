@@ -3,23 +3,23 @@
    ============================================ */
 
 :root {
-  /* Light Theme (default) */
+  /* Light Theme (default) - Enhanced contrast */
   --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fc;
-  --bg-tertiary: #eef1f6;
-  --text-primary: #1a1d26;
-  --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
+  --bg-secondary: #f5f6fa;
+  --bg-tertiary: #e8ebf2;
+  --text-primary: #111318;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
   --accent: #6366f1;
   --accent-hover: #4f46e5;
-  --accent-light: rgba(99, 102, 241, 0.1);
-  --border: #e5e7eb;
-  --success: #10b981;
-  --danger: #ef4444;
-  --ring-bg: #e5e7eb;
+  --accent-light: rgba(99, 102, 241, 0.12);
+  --border: #d1d5db;
+  --success: #059669;
+  --danger: #dc2626;
+  --ring-bg: #d1d5db;
   --ring-progress: #6366f1;
-  --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --input-bg: #f3f4f6;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  --input-bg: #eef0f5;
 }
 
 [data-theme="dark"] {
@@ -810,4 +810,63 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* ============================================
+   Light Mode Specific Overrides
+   ============================================ */
+
+/* Platform badge - darker colors for light mode */
+:root .platform-badge.generic {
+  background: rgba(180, 130, 0, 0.18);
+  color: #b45309;
+}
+
+:root .platform-badge.supported {
+  color: #047857;
+}
+
+:root .platform-badge.unsupported {
+  color: #b91c1c;
+}
+
+/* Theme toggle - more visible in light mode */
+:root .theme-toggle {
+  background: #dde1e9;
+  border: 1px solid #c5cad4;
+}
+
+:root .theme-toggle:hover {
+  background: #cdd2dc;
+}
+
+:root .theme-icon {
+  filter: brightness(0.6) saturate(1.2);
+}
+
+/* Dark mode restores original styling */
+[data-theme="dark"] .platform-badge.generic {
+  background: rgba(251, 191, 36, 0.15);
+  color: #f59e0b;
+}
+
+[data-theme="dark"] .platform-badge.supported {
+  color: var(--success);
+}
+
+[data-theme="dark"] .platform-badge.unsupported {
+  color: var(--danger);
+}
+
+[data-theme="dark"] .theme-toggle {
+  background: var(--bg-tertiary);
+  border: none;
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+  background: var(--border);
+}
+
+[data-theme="dark"] .theme-icon {
+  filter: none;
 }

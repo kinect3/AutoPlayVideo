@@ -232,7 +232,7 @@ async function handleMessage(message, sender) {
     }
     
     case 'getTimerStatus': {
-      const status = timerEngine.getTimerStatus();
+      const status = await timerEngine.getTimerStatus();
       return { success: true, status };
     }
     
