@@ -81,31 +81,7 @@
       </button>
       
       <div class="settings-panel hidden" id="settingsPanel">
-        <div class="setting-row">
-          <label class="setting-label" for="showOverlay">Show overlay</label>
-          <label class="toggle-switch">
-            <input type="checkbox" id="showOverlay" checked title="Show countdown overlay on video">
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div class="setting-row">
-          <label class="setting-label" for="showNotifications">Notifications</label>
-          <label class="toggle-switch">
-            <input type="checkbox" id="showNotifications" checked title="Show notification when timer expires">
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div class="setting-row">
-          <label class="setting-label" for="autoPauseNext">Auto-pause next episode</label>
-          <label class="toggle-switch">
-            <input type="checkbox" id="autoPauseNext" title="Automatically pause when next episode starts">
-            <span class="slider"></span>
-          </label>
-        </div>
-        
-        <div class="divider-thin"></div>
-        
-        <!-- Customize Presets Section -->
+        <!-- Customize Presets Section (moved to top) -->
         <div class="setting-row presets-header">
           <label class="setting-label">⚡ Quick Presets</label>
           <button class="edit-presets-btn" id="editPresetsBtn" title="Edit presets">✏️ Edit</button>
@@ -139,10 +115,34 @@
             </div>
           </div>
           <div class="presets-editor-actions">
-            <button class="save-presets-btn" id="savePresetsBtn">💾 Save Presets</button>
-            <button class="reset-presets-btn" id="resetPresetsBtn">↩️ Reset to Default</button>
+            <button class="save-presets-btn" id="savePresetsBtn">💾 Save</button>
+            <button class="reset-presets-btn" id="resetPresetsBtn">↩️ Reset</button>
           </div>
-          <p class="setting-hint">Format: 30s, 5m, 1h, 1h 30m (1 second to 24 hours)</p>
+          <p class="setting-hint">Format: 30s, 5m, 1h 30m (1s to 24h)</p>
+        </div>
+        
+        <div class="divider-thin"></div>
+        
+        <div class="setting-row">
+          <label class="setting-label" for="showOverlay">Show overlay</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="showOverlay" checked title="Show countdown overlay on video">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <label class="setting-label" for="showNotifications">Notifications</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="showNotifications" checked title="Show notification when timer expires">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <label class="setting-label" for="autoPauseNext">Auto-pause next episode</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="autoPauseNext" title="Automatically pause when next episode starts">
+            <span class="slider"></span>
+          </label>
         </div>
       </div>
     </section>

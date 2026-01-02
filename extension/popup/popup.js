@@ -541,7 +541,7 @@ async function savePresets() {
     elements.savePresetsBtn.textContent = '✓ Saved!';
     elements.savePresetsBtn.style.background = 'var(--success)';
     setTimeout(() => {
-      elements.savePresetsBtn.textContent = '💾 Save Presets';
+      elements.savePresetsBtn.textContent = '💾 Save';
       elements.savePresetsBtn.style.background = '';
     }, 1500);
   } catch (error) {
@@ -559,7 +559,7 @@ async function resetPresets() {
     // Show reset feedback
     elements.resetPresetsBtn.textContent = '✓ Reset!';
     setTimeout(() => {
-      elements.resetPresetsBtn.textContent = '↩️ Reset to Default';
+      elements.resetPresetsBtn.textContent = '↩️ Reset';
     }, 1500);
   } catch (error) {
     console.error('[Viboot] Failed to reset presets:', error);
