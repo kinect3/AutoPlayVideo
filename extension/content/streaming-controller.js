@@ -773,8 +773,26 @@ const OVERLAY_STYLES = `
 `;
 
 let vibootOverlay = null;
+let vibootOverlayEnabled = true; // Cache setting
+
+// Load overlay setting from storage
+async function loadOverlaySetting() {
+  try {
+    const response = await chrome.runtime.sendMessage({ action: 'getSettings' });
+    if (response?.success) {
+      vibootOverlayEnabled = response.settings?.showOverlay !== false;
+    }
+  } catch (e) {
+    vibootOverlayEnabled = true; // Default to enabled
+  }
+}
+
+// Load setting on script init
+loadOverlaySetting();
 
 function createOverlay() {
+  // Check if overlay is disabled in settings
+  if (!vibootOverlayEnabled) return;
   if (vibootOverlay) return;
 
   // Inject styles
@@ -815,6 +833,9 @@ let lastOverlayUpdate = 0;
 let lastOverlayRemaining = -1;
 
 function updateOverlay(remaining) {
+  // Check if overlay is disabled
+  if (!vibootOverlayEnabled) return;
+  
   // Skip if same value (no visual change needed)
   if (remaining === lastOverlayRemaining) return;
   
@@ -850,8 +871,9 @@ function updateOverlay(remaining) {
 }
 
 function showOverlay() {
+  if (!vibootOverlayEnabled) return;
   if (!vibootOverlay) createOverlay();
-  vibootOverlay.classList.add('visible');
+  if (vibootOverlay) vibootOverlay.classList.add('visible');
 }
 
 function hideOverlay() {
@@ -1027,10 +1049,15 @@ if (!window.vibootMessageListenerAdded) {
           break;
 
         case 'updateOverlay':
-          // Only update overlay in main frame
+          // Only update overlay in main frame and if enabled
           if (isMainFrame && request.remaining !== undefined) {
-            showOverlay();
-            updateOverlay(request.remaining);
+            // Reload setting in case it changed
+            loadOverlaySetting().then(() => {
+              if (vibootOverlayEnabled) {
+                showOverlay();
+                updateOverlay(request.remaining);
+              }
+            });
           }
           sendResponse({ success: true });
           break;
@@ -1067,11 +1094,14 @@ if (!window.vibootMessageListenerAdded) {
 
   // Check for existing timer on load (only in main frame)
   if (window.self === window.top) {
-    chrome.runtime.sendMessage({ action: 'getTimerStatus' }, (response) => {
-      if (response?.success && response.status?.active) {
-        showOverlay();
-        updateOverlay(response.status.remaining);
-      }
+    // Reload setting first, then check timer
+    loadOverlaySetting().then(() => {
+      chrome.runtime.sendMessage({ action: 'getTimerStatus' }, (response) => {
+        if (response?.success && response.status?.active && vibootOverlayEnabled) {
+          showOverlay();
+          updateOverlay(response.status.remaining);
+        }
+      });
     });
   }
 }
