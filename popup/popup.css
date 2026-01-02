@@ -1,0 +1,270 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 320px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #f8f9fa;
+}
+
+.container {
+  padding: 0;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  font-size: 32px;
+}
+
+.header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.tagline {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* Platform Info */
+.platform-info {
+  background: white;
+  padding: 12px 20px;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.platform-info.detected {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.platform-info.not-detected {
+  color: #dc3545;
+}
+
+/* Timer Section */
+.timer-section {
+  background: white;
+  padding: 20px;
+}
+
+.timer-section h2 {
+  font-size: 16px;
+  margin-bottom: 16px;
+  color: #343a40;
+}
+
+/* Input Group */
+.input-group {
+  margin-bottom: 16px;
+}
+
+#timerMinutes {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#timerMinutes:focus {
+  border-color: #667eea;
+}
+
+.input-label {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+/* Quick Presets */
+.quick-presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.preset-btn {
+  padding: 10px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.preset-btn:hover {
+  background: #e9ecef;
+  border-color: #667eea;
+}
+
+.preset-btn:active {
+  transform: scale(0.95);
+}
+
+/* Primary Button */
+.primary-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.primary-btn:active {
+  transform: translateY(0);
+}
+
+/* Active Timer Display */
+.active-timer {
+  text-align: center;
+}
+
+.countdown-display {
+  margin: 20px 0;
+}
+
+.countdown-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.countdown-time {
+  font-size: 48px;
+  font-weight: bold;
+  color: #667eea;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 8px;
+}
+
+.countdown-label {
+  font-size: 13px;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Timer Actions */
+.timer-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.secondary-btn {
+  flex: 1;
+  padding: 12px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.secondary-btn:hover {
+  background: #218838;
+}
+
+.danger-btn {
+  flex: 1;
+  padding: 12px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.danger-btn:hover {
+  background: #c82333;
+}
+
+/* Settings Preview */
+.settings-preview {
+  background: #f8f9fa;
+  padding: 16px 20px;
+  border-top: 1px solid #dee2e6;
+}
+
+.setting-item {
+  margin-bottom: 10px;
+}
+
+.setting-item:last-child {
+  margin-bottom: 0;
+}
+
+.setting-item label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #495057;
+  cursor: pointer;
+}
+
+.setting-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Footer */
+.footer {
+  background: white;
+  padding: 12px 20px;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.footer a {
+  color: #667eea;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.divider {
+  color: #dee2e6;
+}

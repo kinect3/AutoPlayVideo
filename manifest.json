@@ -1,0 +1,72 @@
+{
+  "manifest_version": 3,
+  "name": "SleepWatch - Sleep Timer for Streaming",
+  "version": "1.0.0",
+  "description": "Stop binge-watching. Set a sleep timer that automatically pauses your video. Works on Netflix, YouTube, Amazon Prime, Disney+, and more.",
+  "author": "Kelvin C",
+  "homepage_url": "https://github.com/kckinect/Viboot",
+  
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  },
+  
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon16.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
+    },
+    "default_title": "SleepWatch - Set Sleep Timer"
+  },
+  
+  "permissions": [
+    "storage",
+    "tabs",
+    "notifications",
+    "scripting",
+    "offscreen"
+  ],
+  
+  "host_permissions": [
+    "https://www.netflix.com/*",
+    "https://www.amazon.com/*",
+    "https://www.primevideo.com/*",
+    "https://www.disneyplus.com/*",
+    "https://www.youtube.com/*",
+    "https://www.crunchyroll.com/*",
+    "https://www.hbomax.com/*",
+    "https://www.max.com/*"
+  ],
+  
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.netflix.com/*",
+        "https://www.amazon.com/*",
+        "https://www.primevideo.com/*",
+        "https://www.disneyplus.com/*",
+        "https://www.youtube.com/*",
+        "https://www.crunchyroll.com/*",
+        "https://www.hbomax.com/*",
+        "https://www.max.com/*"
+      ],
+      "js": ["content/video-controller.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

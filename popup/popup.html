@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SleepWatch</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">😴</div>
+      <div>
+        <h1>SleepWatch</h1>
+        <p class="tagline">Don't binge. Sleep better.</p>
+      </div>
+    </div>
+    
+    <!-- Platform Detection -->
+    <div class="platform-info">
+      <span id="platformStatus">Detecting platform...</span>
+    </div>
+    
+    <!-- Timer Input Section -->
+    <div class="timer-section" id="timerInput">
+      <h2>Set Sleep Timer</h2>
+      
+      <div class="input-group">
+        <input 
+          type="number" 
+          id="timerMinutes" 
+          min="1" 
+          max="1440" 
+          value="30"
+          placeholder="Minutes"
+        >
+        <span class="input-label">minutes (1-1440)</span>
+      </div>
+      
+      <div class="quick-presets">
+        <button class="preset-btn" data-minutes="15">15 min</button>
+        <button class="preset-btn" data-minutes="30">30 min</button>
+        <button class="preset-btn" data-minutes="45">45 min</button>
+        <button class="preset-btn" data-minutes="60">60 min</button>
+      </div>
+      
+      <button id="startTimer" class="primary-btn">
+        Start Sleep Timer ⏰
+      </button>
+    </div>
+    
+    <!-- Active Timer Section -->
+    <div class="timer-section active-timer" id="activeTimer" style="display: none;">
+      <h2>Timer Active</h2>
+      
+      <div class="countdown-display">
+        <div class="countdown-icon">😴</div>
+        <div class="countdown-time" id="countdownTime">30:00</div>
+        <div class="countdown-label">remaining</div>
+      </div>
+      
+      <div class="timer-actions">
+        <button id="extendTimer" class="secondary-btn">
+          Extend +10 min
+        </button>
+        <button id="stopTimer" class="danger-btn">
+          Stop Timer
+        </button>
+      </div>
+    </div>
+    
+    <!-- Settings Preview -->
+    <div class="settings-preview">
+      <div class="setting-item">
+        <label>
+          <input type="checkbox" id="showOverlay" checked>
+          Show countdown overlay
+        </label>
+      </div>
+      <div class="setting-item">
+        <label>
+          <input type="checkbox" id="playSound" checked>
+          Play alert sound
+        </label>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="footer">
+      <a href="#" id="openSettings">⚙️ Settings</a>
+      <span class="divider">•</span>
+      <a href="https://github.com/kckinect/Viboot" target="_blank">GitHub</a>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
