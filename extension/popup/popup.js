@@ -5,8 +5,10 @@
 
 import { AUTOPLAY_CONFIG, getSiteDisplayName } from '../utils/config.js';
 import { parseTimeInput, formatSecondsToDisplay, formatDurationMinutes } from '../utils/time-utils.js';
+import { trackPageView, trackTimerStart } from '../utils/analytics.js';
 
-// ============================================// CONSTANTS
+// ============================================
+// CONSTANTS
 // ============================================
 
 const RING_CIRCUMFERENCE = 339.292; // 2π × radius(54px)
@@ -91,6 +93,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Non-critical: Load asynchronously without blocking
     detectPlatform().catch(e => console.warn('[AutoPlay] Platform detection failed:', e));
+    
+    // Track page view
+    trackPageView('Popup', 'popup').catch(() => {});
     
     // Note: We use polling in startLocalUpdates instead of message listeners
     // This avoids race conditions with multiple popups
@@ -219,10 +224,14 @@ async function startTimer(minutes) {
     const response = await chrome.runtime.sendMessage({
       action: 'startTimer',
       minutes: minutes,
-      tabId: tab.id
+      tabId: tab.id,
+      source: 'popup'
     });
     
     if (response.success) {
+      // Track analytics
+      trackTimerStart(minutes * 60, 'popup').catch(() => {});
+      
       currentTimer = {
         active: true,
         status: 'active',

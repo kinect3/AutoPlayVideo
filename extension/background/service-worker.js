@@ -2,6 +2,7 @@ import { ConfigManager } from '../utils/config-manager.js';
 import { timerEngine } from './timer-engine.js';
 import { formatSecondsToDisplay } from '../utils/time-utils.js';
 import { AUTOPLAY_CONFIG } from '../utils/config.js';
+import { trackTimerStart, trackTimerComplete, trackTimerStop } from '../utils/analytics.js';
 
 // ============================================
 // CONFIGURATION CONSTANTS
@@ -314,17 +315,33 @@ async function handleMessage(message, sender) {
         const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (activeTab) {
           const timer = await timerEngine.startTimer(minutes, activeTab.id);
+          
+          // Track analytics
+          trackTimerStart(minutes * 60, request.source || 'popup').catch(() => {});
+          
           return { success: true, timer };
         }
         return { success: false, error: 'No active tab found' };
       }
       
       const timer = await timerEngine.startTimer(minutes, tabId);
+      
+      // Track analytics
+      trackTimerStart(minutes * 60, 'context_menu').catch(() => {});
+      
       return { success: true, timer };
     }
     
     case 'stopTimer': {
+      const activeTimer = timerEngine.activeTimer;
       await timerEngine.stopTimer();
+      
+      // Track analytics if timer was active
+      if (activeTimer) {
+        const elapsed = activeTimer.duration - activeTimer.remaining;
+        trackTimerStop(elapsed, activeTimer.remaining).catch(() => {});
+      }
+      
       return { success: true };
     }
     

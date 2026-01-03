@@ -4,7 +4,58 @@
  * Handles: video detection, pause/play, timer overlay, custom timer prompts
  */
 
-import { parseTimeInput, formatSecondsToDisplay, formatCountdown } from '../utils/time-utils.js';
+// ============================================================================
+// TIME UTILITIES (Inline copies from time-utils.js for content script context)
+// ============================================================================
+
+function parseTimeInput(input) {
+  if (!input) return null;
+  input = input.trim().toLowerCase();
+  if (!input) return null;
+  
+  if (/^\d+(?:\.\d+)?$/.test(input)) {
+    const seconds = parseFloat(input);
+    return (seconds >= 1 && seconds <= 86400) ? Math.round(seconds) : null;
+  }
+  
+  let totalSeconds = 0;
+  const regex = /(\d+(?:\.\d+)?)\s*([smh])/g;
+  const unitValues = { s: 1, m: 60, h: 3600 };
+  let match;
+  
+  while ((match = regex.exec(input)) !== null) {
+    totalSeconds += parseFloat(match[1]) * unitValues[match[2]];
+  }
+  
+  if (totalSeconds < 1 || totalSeconds > 86400) return null;
+  return Math.round(totalSeconds);
+}
+
+function formatSecondsToDisplay(totalSeconds) {
+  if (totalSeconds < 60) return totalSeconds + 's';
+  
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = Math.round(totalSeconds % 60);
+  
+  let result = '';
+  if (hours > 0) result += hours + 'h ';
+  if (minutes > 0) result += minutes + 'm';
+  if (seconds > 0 && hours === 0) result += (minutes > 0 ? ' ' : '') + seconds + 's';
+  
+  return result.trim() || '0s';
+}
+
+function formatCountdown(remaining) {
+  const hours = Math.floor(remaining / 3600);
+  const minutes = Math.floor((remaining % 3600) / 60);
+  const seconds = remaining % 60;
+  
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
 
 // ============================================================================
 // CONFIGURATION CONSTANTS

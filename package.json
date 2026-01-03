@@ -1,0 +1,44 @@
+{
+  "name": "autoplayvideo-extension",
+  "version": "1.0.0",
+  "description": "Chrome extension for auto-playing videos with timer controls",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint extension/**/*.js",
+    "lint:fix": "eslint extension/**/*.js --fix",
+    "format": "prettier --write \"extension/**/*.js\"",
+    "format:check": "prettier --check \"extension/**/*.js\"",
+    "validate": "npm run lint && npm run format:check && npm run test",
+    "build": "bash create-deployment-package.sh",
+    "prepare": "node -e \"try { require('husky').install() } catch (e) {}\""
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "@vitest/coverage-v8": "^1.5.0",
+    "eslint": "^8.57.0",
+    "husky": "^9.0.11",
+    "jsdom": "^24.0.0",
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.5",
+    "vitest": "^1.5.0"
+  },
+  "lint-staged": {
+    "extension/**/*.js": [
+      "eslint --fix",
+      "prettier --write",
+      "vitest related --run"
+    ]
+  },
+  "keywords": [
+    "chrome-extension",
+    "video",
+    "timer",
+    "autoplay",
+    "streaming"
+  ],
+  "author": "",
+  "license": "MIT"
+}

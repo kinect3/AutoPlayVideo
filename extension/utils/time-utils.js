@@ -1,7 +1,9 @@
 /**
  * Shared Time Utilities
  * Consolidated time parsing and formatting functions
- * Used across popup, settings, service worker, and content scripts
+ * Used across popup, settings, service worker (as ES6 module)
+ * 
+ * Note: Content scripts load functions from streaming-controller.js directly
  */
 
 /**
@@ -16,7 +18,7 @@
  * @param {string} input - Time string to parse
  * @returns {number|null} Seconds or null if invalid
  */
-export function parseTimeInput(input) {
+function parseTimeInput(input) {
   if (!input) return null;
   
   input = input.trim().toLowerCase();
@@ -51,7 +53,7 @@ export function parseTimeInput(input) {
  * @param {number} totalSeconds - Seconds to format
  * @returns {string} Formatted time string
  */
-export function formatSecondsToDisplay(totalSeconds) {
+function formatSecondsToDisplay(totalSeconds) {
   if (totalSeconds < 60) {
     return totalSeconds + 's';
   }
@@ -75,7 +77,7 @@ export function formatSecondsToDisplay(totalSeconds) {
  * @param {number} remaining - Seconds remaining
  * @returns {string} Formatted countdown (e.g., "05:30" or "1:05:30")
  */
-export function formatCountdown(remaining) {
+function formatCountdown(remaining) {
   const hours = Math.floor(remaining / 3600);
   const minutes = Math.floor((remaining % 3600) / 60);
   const seconds = remaining % 60;
@@ -93,7 +95,7 @@ export function formatCountdown(remaining) {
  * @param {number} seconds - Seconds to format
  * @returns {string} Formatted duration (e.g., "30min", "1h 30m")
  */
-export function formatDurationMinutes(seconds) {
+function formatDurationMinutes(seconds) {
   if (!seconds) return '--';
   
   const mins = Math.round(seconds / 60);
@@ -114,7 +116,7 @@ export function formatDurationMinutes(seconds) {
  * @param {number} max - Maximum allowed (default 86400 = 24h)
  * @returns {boolean} True if valid
  */
-export function isValidDuration(seconds, min = 1, max = 86400) {
+function isValidDuration(seconds, min = 1, max = 86400) {
   return typeof seconds === 'number' && seconds >= min && seconds <= max;
 }
 
@@ -123,7 +125,7 @@ export function isValidDuration(seconds, min = 1, max = 86400) {
  * @param {number} minutes
  * @returns {number} seconds
  */
-export function minutesToSeconds(minutes) {
+function minutesToSeconds(minutes) {
   return Math.round(minutes * 60);
 }
 
@@ -132,6 +134,17 @@ export function minutesToSeconds(minutes) {
  * @param {number} seconds
  * @returns {number} minutes
  */
-export function secondsToMinutes(seconds) {
+function secondsToMinutes(seconds) {
   return seconds / 60;
 }
+
+// Export for ES6 modules (service worker, popup, settings)
+export {
+  parseTimeInput,
+  formatSecondsToDisplay,
+  formatCountdown,
+  formatDurationMinutes,
+  isValidDuration,
+  minutesToSeconds,
+  secondsToMinutes
+};
