@@ -53,17 +53,7 @@ const CONFIG_MANAGER_SETTINGS = {
   }
 };
 
-// Legacy constants for backward compatibility
-const API_URL = CONFIG_MANAGER_SETTINGS.API_URL;
-const TELEMETRY_URL = CONFIG_MANAGER_SETTINGS.TELEMETRY_URL;
-const FETCH_TIMEOUT = CONFIG_MANAGER_SETTINGS.FETCH_TIMEOUT;
-const MAX_RETRIES = CONFIG_MANAGER_SETTINGS.MAX_RETRIES;
-const RETRY_DELAYS = CONFIG_MANAGER_SETTINGS.RETRY_DELAYS;
-const CACHE_MAX_AGE = CONFIG_MANAGER_SETTINGS.CACHE_MAX_AGE;
-
 // Telemetry batching to prevent server spam
-const TELEMETRY_BATCH_DELAY = CONFIG_MANAGER_SETTINGS.TELEMETRY.BATCH_DELAY;
-const TELEMETRY_MAX_BATCH_SIZE = CONFIG_MANAGER_SETTINGS.TELEMETRY.MAX_BATCH_SIZE;
 let telemetryQueue = [];
 let telemetryFlushTimer = null;
 
@@ -78,7 +68,7 @@ export class ConfigManager {
   /**
    * Fetch with timeout to prevent hanging requests
    */
-  static async fetchWithTimeout(url, timeout = FETCH_TIMEOUT) {
+  static async fetchWithTimeout(url, timeout = CONFIG_MANAGER_SETTINGS.FETCH_TIMEOUT) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
     
@@ -126,15 +116,15 @@ export class ConfigManager {
       let response = null;
       
       // Retry with exponential backoff
-      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      for (let attempt = 0; attempt < CONFIG_MANAGER_SETTINGS.MAX_RETRIES; attempt++) {
         retryCount = attempt;
         try {
           if (attempt > 0) {
-            console.log(`[AutoPlay] Retry attempt ${attempt + 1}/${MAX_RETRIES}...`);
-            await new Promise(resolve => setTimeout(resolve, RETRY_DELAYS[attempt]));
+            console.log(`[AutoPlay] Retry attempt ${attempt + 1}/${CONFIG_MANAGER_SETTINGS.MAX_RETRIES}...`);
+            await new Promise(resolve => setTimeout(resolve, CONFIG_MANAGER_SETTINGS.RETRY_DELAYS[attempt]));
           }
           
-          response = await this.fetchWithTimeout(API_URL);
+          response = await this.fetchWithTimeout(CONFIG_MANAGER_SETTINGS.API_URL);
           
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -144,7 +134,7 @@ export class ConfigManager {
           break;
         } catch (error) {
           lastError = error;
-          if (attempt === MAX_RETRIES - 1) {
+          if (attempt === CONFIG_MANAGER_SETTINGS.MAX_RETRIES - 1) {
             throw error; // Final attempt failed
           }
         }
@@ -228,7 +218,7 @@ export class ConfigManager {
       // Check memory cache first (fastest)
       if (memoryCache.config && memoryCache.config[platformKey]) {
         const age = Date.now() - (memoryCache.timestamp || 0);
-        if (age < CACHE_MAX_AGE) {
+        if (age < CONFIG_MANAGER_SETTINGS.CACHE_MAX_AGE) {
           return memoryCache.config[platformKey];
         }
       }
@@ -269,14 +259,14 @@ export class ConfigManager {
       
       // Check age
       const age = Date.now() - data.lastSynced;
-      if (age > CACHE_MAX_AGE) {
+      if (age > CONFIG_MANAGER_SETTINGS.CACHE_MAX_AGE) {
         return true;
       }
       
       // Optionally check server version
       if (forceCheckVersion && data.configVersion) {
         try {
-          const response = await this.fetchWithTimeout(API_URL);
+          const response = await this.fetchWithTimeout(CONFIG_MANAGER_SETTINGS.API_URL);
           const remoteConfig = await response.json();
           if (remoteConfig.version && remoteConfig.version !== data.configVersion) {
             console.log(`[AutoPlay] New config version available: ${remoteConfig.version}`);
@@ -329,7 +319,7 @@ export class ConfigManager {
     });
     
     // Flush immediately if batch is full
-    if (telemetryQueue.length >= TELEMETRY_MAX_BATCH_SIZE) {
+    if (telemetryQueue.length >= CONFIG_MANAGER_SETTINGS.TELEMETRY.MAX_BATCH_SIZE) {
       this.flushTelemetry();
       return;
     }
@@ -338,7 +328,7 @@ export class ConfigManager {
     if (!telemetryFlushTimer) {
       telemetryFlushTimer = setTimeout(() => {
         this.flushTelemetry();
-      }, TELEMETRY_BATCH_DELAY);
+      }, CONFIG_MANAGER_SETTINGS.TELEMETRY.BATCH_DELAY);
     }
   }
   
@@ -360,7 +350,7 @@ export class ConfigManager {
     (async () => {
       try {
         const manifest = chrome.runtime.getManifest();
-        await fetch(TELEMETRY_URL, {
+        await fetch(CONFIG_MANAGER_SETTINGS.TELEMETRY_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

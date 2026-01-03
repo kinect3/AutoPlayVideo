@@ -14,20 +14,6 @@ const ERROR_DISPLAY_DURATION = 3000; // milliseconds
 const POLLING_INTERVAL = 1000; // milliseconds
 const FEEDBACK_DISPLAY_DURATION = 1500; // milliseconds
 
-// Supported streaming platforms
-const PLATFORM_MAP = {
-  'netflix.com': 'Netflix',
-  'youtube.com': 'YouTube',
-  'disneyplus.com': 'Disney+',
-  'amazon.com': 'Prime Video',
-  'primevideo.com': 'Prime Video',
-  'hbomax.com': 'HBO Max',
-  'max.com': 'Max',
-  'crunchyroll.com': 'Crunchyroll',
-  'twitch.tv': 'Twitch',
-  'hulu.com': 'Hulu'
-};
-
 // Default presets in seconds
 const DEFAULT_PRESETS = [
   30 * 60,   // 30m (main clock)
@@ -157,20 +143,16 @@ async function detectPlatform() {
       return;
     }
     
-    let detected = null;
-    for (const [domain, name] of Object.entries(PLATFORM_MAP)) {
-      if (hostname.includes(domain)) {
-        detected = name;
-        break;
-      }
-    }
+    // Use getSiteDisplayName from config.js
+    const siteName = getSiteDisplayName(hostname);
     
-    if (detected) {
-      setPlatformBadge(detected, true);
+    if (siteName && siteName !== 'Unknown Site') {
+      // Known platform
+      setPlatformBadge(siteName, true);
     } else {
-      // Extract site name from hostname (e.g., "crave" from "www.crave.ca")
-      const siteName = extractSiteName(hostname);
-      setPlatformBadge(siteName, 'generic');
+      // Unknown platform - extract basic site name
+      const extracted = extractSiteName(hostname);
+      setPlatformBadge(extracted, 'generic');
     }
   } catch (error) {
     setPlatformBadge('Error', false);
