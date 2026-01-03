@@ -34,6 +34,7 @@ export class SleepTimerEngine {
     this.isTicking = false; // Prevent overlapping ticks
     this.isRestoring = false; // Prevent concurrent restoration
     this.expirationLock = false; // Atomic lock for expiration (prevents race between tick and alarm)
+    this.lastExpirationTime = 0; // Timestamp deduplication - prevent multiple expirations within 5s window
     
     // Set up tab close listener
     this.setupTabListener();
@@ -132,14 +133,14 @@ export class SleepTimerEngine {
     // Broadcast update first so UI shows current time (including 0)
     this.broadcastTimerUpdate();
     
-    // Then check for expiration
+    // Then check for expiration using centralized method
     if (this.activeTimer.remaining <= 0) {
       // Stop the interval immediately
       if (this.intervalId) {
         clearInterval(this.intervalId);
         this.intervalId = null;
       }
-      await this.onTimerExpire();
+      await this.checkAndExpireIfNeeded();
       return;
     }
     
@@ -165,18 +166,8 @@ export class SleepTimerEngine {
         await this.syncTimerState();
       }
     } else if (alarmName === 'vibootTimerExpiry') {
-      // Direct expiration alarm - check if timer should expire
-      if (this.activeTimer && !this.isExpiring) {
-        // Calculate actual remaining time
-        const elapsed = Math.floor((Date.now() - this.activeTimer.startTime) / 1000);
-        const calculatedRemaining = this.activeTimer.duration - elapsed;
-        
-        // Only expire if we're actually at or past expiration time
-        if (calculatedRemaining <= 0) {
-          this.activeTimer.remaining = 0;
-          await this.onTimerExpire();
-        }
-      }
+      // Direct expiration alarm - use centralized check
+      await this.checkAndExpireIfNeeded();
     }
   }
   
@@ -280,7 +271,36 @@ export class SleepTimerEngine {
     return hostname.replace(/^www\./, '').split('.')[0];
   }
   
+  /**
+   * Centralized expiration check - single source of truth
+   * All expiration paths should call this method
+   */
+  async checkAndExpireIfNeeded() {
+    // Skip if no timer or already expiring
+    if (!this.activeTimer || this.isExpiring) {
+      return;
+    }
+    
+    // Calculate actual remaining time from start time
+    const elapsed = Math.floor((Date.now() - this.activeTimer.startTime) / 1000);
+    const calculatedRemaining = this.activeTimer.duration - elapsed;
+    
+    // Only expire if we're actually at or past expiration time
+    if (calculatedRemaining <= 0) {
+      this.activeTimer.remaining = 0;
+      await this.onTimerExpire();
+    }
+  }
+  
   async onTimerExpire() {
+    // Timestamp deduplication - prevent multiple expirations within 5 second window
+    const now = Date.now();
+    if (now - this.lastExpirationTime < 5000) {
+      console.log('[Viboot] Expiration already handled recently (within 5s), skipping duplicate');
+      return;
+    }
+    this.lastExpirationTime = now;
+    
     // Atomic lock - prevent multiple simultaneous expiration calls (race between tick and alarm)
     if (this.expirationLock || this.isExpiring) {
       console.log('[Viboot] Timer expiration already in progress, skipping');
@@ -302,16 +322,16 @@ export class SleepTimerEngine {
     
     const tabId = this.activeTimer.tabId;
     
-    // Save last timer info before cleanup
-    await this.saveLastTimerInfo();
-    
-    // Cleanup alarms but keep activeTimer reference until we're done
+    // IMMEDIATE alarm clearing - prevent any other paths from triggering
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
-    chrome.alarms.clear('vibootTimerTick');
-    chrome.alarms.clear('vibootTimerExpiry');
+    await chrome.alarms.clear('vibootTimerTick');
+    await chrome.alarms.clear('vibootTimerExpiry');
+    
+    // Save last timer info after clearing alarms
+    await this.saveLastTimerInfo();
     
     try {
       // Check if tab exists in this browser
@@ -649,7 +669,7 @@ export class SleepTimerEngine {
       
       if (remaining <= 0) {
         this.activeTimer = { ...saved, remaining: 0 };
-        await this.onTimerExpire();
+        await this.checkAndExpireIfNeeded();
         this.isRestoring = false;
         return null;
       }
