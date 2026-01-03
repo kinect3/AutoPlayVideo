@@ -1177,10 +1177,23 @@ if (!window.autoplayMessageListenerAdded) {
       return;
     }
     
-    // ONLY MAIN FRAME RESPONDS - Prevents duplicate processing in iframes
+    // Check if we're in main frame
     const isMainFrame = window.self === window.top;
-    if (!isMainFrame) {
-      // Silently ignore messages in iframes - main frame will handle it
+    
+    // For video control actions, only respond if THIS frame has a video element
+    const videoControlActions = ['pauseVideo', 'playVideo'];
+    if (videoControlActions.includes(request.action)) {
+      const hasVideo = !!document.querySelector('video');
+      if (!hasVideo) {
+        // This frame doesn't have video, silently ignore
+        return;
+      }
+    }
+    
+    // For UI actions (overlay, etc), only main frame should respond
+    const uiActions = ['showOverlay', 'hideOverlay', 'showCustomTimerPrompt', 'updateOverlay', 'refreshOverlaySetting', 'destroyOverlay'];
+    if (uiActions.includes(request.action) && !isMainFrame) {
+      // Not main frame, ignore UI actions
       return;
     }
     
