@@ -6,7 +6,32 @@
 
 ---
 
-## 📐 CORE ARCHITECTURAL PRINCIPLES
+## � Document Hierarchy
+
+This document is part of a complete development system:
+
+```
+📊 PRODUCT_DEVELOPMENT_GUIDE.md
+    └─ Strategic: What to build, why, and when
+        │
+        └─ 🏗️ DEVELOPMENT_STANDARDS.md (This document)
+            └─ Tactical: How to build it (architecture, patterns)
+                │
+                └─ 📝 CODING_GUIDE.md
+                    └─ Daily: Writing individual functions and files
+                        │
+                        └─ 💬 COMMUNICATION_PROTOCOL.md
+                            └─ How to work with AI assistants effectively
+```
+
+**See also:**
+- [PRODUCT_DEVELOPMENT_GUIDE.md](PRODUCT_DEVELOPMENT_GUIDE.md) - Problem definition to deployment
+- [CODING_GUIDE.md](CODING_GUIDE.md) - Daily coding reference
+- [COMMUNICATION_PROTOCOL.md](COMMUNICATION_PROTOCOL.md) - How to communicate effectively
+
+---
+
+## �📐 CORE ARCHITECTURAL PRINCIPLES
 
 ### **1. Single Responsibility Principle**
 Every module, class, and function does ONE thing well.
